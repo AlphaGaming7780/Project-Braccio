@@ -22,7 +22,9 @@ Servo wrist_rot;
 Servo wrist_ver;
 Servo gripper;
 
-int m1 = 90, m2 = 90, m3 = 90, m4 = 90;
+int m1 = 0, m2 = 90, m3 = 90, m4 = 90;
+
+bool manu = false;
 
 void setup() {  
   //Initialization functions and set up the initial position for Braccio
@@ -53,12 +55,28 @@ void loop() {
 	// Serial.println(analogRead(A0));
 
 	// if(analogRead(A0) > 520) {
+	if(manu) {
+		manu();
+	} else {
+		otto();
+	}
+	 
+}
+
+void move(int m1, int m2, int m3, int m4) {
+	Braccio.ServoMovement(10, m1+10, m2-1, m3+7, m4+6, 90, 73);
+}
+
+
+void manu() {
 	m1 += map(analogRead(A0), 0, 1023, -10, 10);
 	m2 += map(analogRead(A1), 0, 1023, -10, 10);
-	m3 += map(analogRead(A2), 0, 1023, -10, 10);
-	m4 += map(analogRead(A3)+2, 0, 1023, -10, 10);
+	m3 += map(analogRead(A2)-8, 0, 1023, -10, 10);
+	m4 += map(analogRead(A3)-4, 0, 1023, -10, 10);
 
-	// }
+	Serial.println(analogRead(A2)-8);
+	Serial.println(analogRead(A3)-4);
+
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
 	if(m2 > 180) m2 = 180;
@@ -67,7 +85,15 @@ void loop() {
 	if(m3 < 0) m3 = 0;
 	if(m4 > 180) m4 = 180;
 	if(m4 < 0) m4 = 0;
-					 	//(step delay, M1, M2, M3, M4, M5, M6);
-	Braccio.ServoMovement(10,         m1, m2, m3, m4, 90,  73);  
-	 
+
+	move(m1, m2, m3, m4);
+}
+
+void otto() {
+	m1 += map(analogRead(A0) - analogRead(A1), -1023, 1023, -10, 10);
+	m2 += map(analogRead(A3) - analogRead(A4), -1023, 1023, -10, 10);
+	// m3 += map(analogRead(A2), 0, 1023, -10, 10);
+	// m4 += map(analogRead(A3), 0, 1023, -10, 10);
+
+	move(m1, m2, m3, m4);
 }
