@@ -56,7 +56,7 @@ void loop() {
 
 	// if(analogRead(A0) > 520) {
 	if(manu) {
-		manu();
+		BrasManu();
 	} else {
 		otto();
 	}
@@ -68,7 +68,7 @@ void move(int m1, int m2, int m3, int m4) {
 }
 
 
-void manu() {
+void BrasManu() {
 	m1 += map(analogRead(A0), 0, 1023, -10, 10);
 	m2 += map(analogRead(A1), 0, 1023, -10, 10);
 	m3 += map(analogRead(A2)-8, 0, 1023, -10, 10);
@@ -91,9 +91,18 @@ void manu() {
 
 void otto() {
 	m1 += map(analogRead(A0) - analogRead(A1), -1023, 1023, -10, 10);
-	m2 += map(analogRead(A3) - analogRead(A4), -1023, 1023, -10, 10);
+	m4 += map(analogRead(A2) - analogRead(A3), -1023, 1023, -10, 10);
 	// m3 += map(analogRead(A2), 0, 1023, -10, 10);
 	// m4 += map(analogRead(A3), 0, 1023, -10, 10);
+	Serial.print("M1 = ");
+	Serial.println(m1);
+	Serial.print("M4 = ");
+	Serial.println(m4);
+
+	if(m1 > 180) m1 = 180;
+	if(m1 < 0) m1 = 0;
+	if(m4 > 180) m4 = 180;
+	if(m4 < 0) m4 = 0;
 
 	move(m1, m2, m3, m4);
 }
