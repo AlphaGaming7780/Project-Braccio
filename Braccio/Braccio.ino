@@ -40,10 +40,7 @@ void setup() {
 	//Wrist rotation (M5): 90 degrees
 	//gripper (M6): 10 degrees
   	Serial.begin(115200);
-	while (!Serial) {
-	  	// will pause Zero, Leonardo, etc until serial console opens
-		delay(1);
-	}
+
 	Braccio.begin();
 	Serial.println("Hello!");
 	// Initialize the INA219.
@@ -51,7 +48,6 @@ void setup() {
 	// you can call a setCalibration function to change this range (see comments).
 	if (! ina219.begin()) {
 		Serial.println("Failed to find INA219 chip");
-		while (1) { delay(10); }
 	}
 	// To use a slightly lower 32V, 1A range (higher precision on amps):
 	//ina219.setCalibration_32V_1A();
