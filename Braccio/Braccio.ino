@@ -1,17 +1,3 @@
- /*
-  testBraccio90.ino
-
- testBraccio90 is a setup sketch to check the alignment of all the servo motors
- This is the first sketch you need to run on Braccio
- When you start this sketch Braccio will be positioned perpendicular to the base
- If you can't see the Braccio in this exact position you need to reallign the servo motors position
-
- Created on 18 Nov 2015
- by Andrea Martino
-
- This example is in the public domain.
- */
-
 #include <Braccio.h>
 #include <Servo.h>
 #include <Wire.h>
@@ -26,11 +12,12 @@ Servo wrist_rot;
 Servo wrist_ver;
 Servo gripper;
 
-int m1 = 0, m2 = 90, m3 = 90, m4 = 90;
+int m1 = 0, m2 = 90, m3 = 90, m4 = 90, angle = -90;
 
 bool manu = false;
 
 void setup() {  
+
 	//Initialization functions and set up the initial position for Braccio
 	//All the servo motors will be positioned in the "safety" position:
 	//Base (M1):90 degrees
@@ -40,15 +27,15 @@ void setup() {
 	//Wrist rotation (M5): 90 degrees
 	//gripper (M6): 10 degrees
   	Serial.begin(115200);
-
 	Braccio.begin();
-	Serial.println("Hello!");
+
 	// Initialize the INA219.
 	// By default the initialization will use the largest range (32V, 2A).  However
 	// you can call a setCalibration function to change this range (see comments).
 	if (! ina219.begin()) {
 		Serial.println("Failed to find INA219 chip");
 	}
+
 	// To use a slightly lower 32V, 1A range (higher precision on amps):
 	//ina219.setCalibration_32V_1A();
 	// Or to use a lower 16V, 400mA range (higher precision on volts and amps):
@@ -59,21 +46,13 @@ void setup() {
 }
 
 void loop() {
-
-	float busvoltage = 0;
-	float current_mA = 0;
-	float power_mW = 0;
-
-
-	busvoltage = ina219.getBusVoltage_V();
-	current_mA = ina219.getCurrent_mA();
-	power_mW = ina219.getPower_mW();
-
 	
-	Serial.print("Bus Voltage:   "); Serial.print(busvoltage); Serial.println(" V");
-	Serial.print("Current:       "); Serial.print(current_mA); Serial.println(" mA");
-	Serial.print("Power:         "); Serial.print(power_mW); Serial.println(" mW");
-	Serial.println("");
+	// Serial.print("Bus Voltage:   "); Serial.print(ina219.getBusVoltage_V()); Serial.println(" V");
+	// Serial.print("Current:       "); Serial.print(ina219.getCurrent_mA()); Serial.println(" mA");
+	// Serial.print("Power:         "); Serial.print(ina219.getPower_mW()); Serial.println(" mW");
+	// Serial.print("");
+
+	// delay(500);
 
 
 	/*
@@ -86,11 +65,6 @@ void loop() {
 	M6=gripper degrees. Allowed values from 10 to 73 degrees. 10: the toungue is open, 73: the gripper is closed.
 	*/
 	
-	// the arm is aligned upwards  and the gripper is closed
-
-	// Serial.println(analogRead(A0));
-
-	// if(analogRead(A0) > 520) {
 	if(manu) {
 		BrasManu();
 	} else {
@@ -110,8 +84,8 @@ void BrasManu() {
 	m3 += map(analogRead(A2)-8, 0, 1023, -10, 10);
 	m4 += map(analogRead(A3)-4, 0, 1023, -10, 10);
 
-	Serial.println(analogRead(A2)-8);
-	Serial.println(analogRead(A3)-4);
+	// Serial.println(analogRead(A2)-8);
+	// Serial.println(analogRead(A3)-4);
 
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
@@ -126,19 +100,26 @@ void BrasManu() {
 }
 
 void otto() {
-	m1 += map(analogRead(A0) - analogRead(A1), -1023, 1023, -10, 10);
-	m4 += map(analogRead(A2) - analogRead(A3), -1023, 1023, -10, 10);
-	// m3 += map(analogRead(A2), 0, 1023, -10, 10);
-	// m4 += map(analogRead(A3), 0, 1023, -10, 10);
-	Serial.print("M1 = ");
-	Serial.println(m1);
-	Serial.print("M4 = ");
-	Serial.println(m4);
+	angle += map(analogRead(A0) - analogRead(A1), -1023, 1023, -10, 10);
+	m1 += map(analogRead(A2) - analogRead(A3), -1023, 1023, -10, 10);
 
+	if(angle > 270) angle = 270;
+	if(angle < -90) angle = -90;
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
-	if(m4 > 180) m4 = 180;
-	if(m4 < 0) m4 = 0;
+
+	m2 = 90+(angle-90)/3;
+	m3 = 90+(angle-90)/3;
+	m4 = 90+(angle-90)/3;
+
+	// Serial.print("M1 = ");
+	// Serial.println(m1);
+	// Serial.print("M2 = ");
+	// Serial.println(m2);
+	// Serial.print("M3 = ");
+	// Serial.println(m3);
+	// Serial.print("M4 = ");
+	// Serial.println(m4);
 
 	move(m1, m2, m3, m4);
 }
