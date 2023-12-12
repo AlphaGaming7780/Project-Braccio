@@ -2,6 +2,7 @@
 #include <Servo.h>
 #include <Wire.h>
 #include <Adafruit_INA219.h>
+#include <LiquidCrystal.h>
 
 Adafruit_INA219 ina219;
 
@@ -12,7 +13,9 @@ Servo wrist_rot;
 Servo wrist_ver;
 Servo gripper;
 
-int m1 = 0, m2 = 90, m3 = 90, m4 = 90, angle = -90;
+const int rs = 2, en = 3, d4 = 4, d5 = 5, d6 = 7, d7 = 8,  _timer = 20000;
+int m1 = 0, m2 = 90, m3 = 90, m4 = 90, angle = -90, cpt_ina = 0;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 bool manu = false;
 
@@ -28,6 +31,7 @@ void setup() {
 	//gripper (M6): 10 degrees
   	Serial.begin(115200);
 	Braccio.begin();
+	lcd.begin(16, 2);
 
 	// Initialize the INA219.
 	// By default the initialization will use the largest range (32V, 2A).  However
@@ -46,12 +50,23 @@ void setup() {
 }
 
 void loop() {
-	
-	// Serial.print("Bus Voltage:   "); Serial.print(ina219.getBusVoltage_V()); Serial.println(" V");
-	// Serial.print("Current:       "); Serial.print(ina219.getCurrent_mA()); Serial.println(" mA");
-	// Serial.print("Power:         "); Serial.print(ina219.getPower_mW()); Serial.println(" mW");
-	// Serial.print("");
 
+	if(cpt_ina == 0){
+		Serial.print("Bus Voltage:   "); Serial.print(ina219.getBusVoltage_V()); Serial.println(" V");
+		Serial.print("Current:       "); Serial.print(ina219.getCurrent_mA()); Serial.println(" mA");
+		Serial.print("Power:         "); Serial.print(ina219.getPower_mW()); Serial.println(" mW");
+		Serial.print("");
+		lcd.clear();
+		lcd.setCursor(0,0);
+		lcd.print("V = "); lcd.print(ina219.getBusVoltage_V()); lcd.print("V");
+		lcd.print("W = "); lcd.print(ina219.getPower_mW()); lcd.print("mW");
+		lcd.setCursor(0,1);
+		lcd.print("I = "); lcd.print(ina219.getCurrent_mA()); lcd.print("mA");
+		cpt_ina = _timer;
+
+	}
+	
+	
 	// delay(500);
 
 
@@ -70,6 +85,7 @@ void loop() {
 	} else {
 		otto();
 	}
+	cpt_ina--;
 	 
 }
 
@@ -122,4 +138,5 @@ void otto() {
 	// Serial.println(m4);
 
 	move(m1, m2, m3, m4);
+
 }
