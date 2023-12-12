@@ -138,10 +138,10 @@ void otto() {
 	// Serial.print("M4 = ");
 	// Serial.println(m4);
 
-	Serial.println("A0 : " + analogRead(A0));
-	Serial.println("A1 : " + analogRead(A1));
-	Serial.println("A2 : " + analogRead(A2));
-	Serial.println("A3 : " + analogRead(A3));
+	Serial.println(("A0 : %i", analogRead(A0)));
+	Serial.println(("A1 : %i", analogRead(A1)));
+	Serial.println(("A2 : %i", analogRead(A2)));
+	Serial.println(("A3 : %i", analogRead(A3)));
 
 	move(m1, m2, m3, m4);
 
