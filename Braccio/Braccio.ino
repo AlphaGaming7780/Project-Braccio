@@ -13,7 +13,7 @@ Servo wrist_rot;
 Servo wrist_ver;
 Servo gripper;
 
-const int rs = 2, en = 3, d4 = 4, d5 = 5, d6 = 7, d7 = 8,  _timer = 20000;
+const int rs = 2, en = 3, d4 = 4, d5 = 5, d6 = 7, d7 = 8,  _timer = 100;
 int m1 = 0, m2 = 90, m3 = 90, m4 = 90, angle = -90, cpt_ina = 0;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
@@ -46,22 +46,23 @@ void setup() {
 	ina219.setCalibration_16V_400mA();
 
 	Serial.println("Measuring voltage and current with INA219 ...");
+	lcd.print("HELLO WORLD");
 
 }
 
 void loop() {
 
 	if(cpt_ina == 0){
-		Serial.print("Bus Voltage:   "); Serial.print(ina219.getBusVoltage_V()); Serial.println(" V");
-		Serial.print("Current:       "); Serial.print(ina219.getCurrent_mA()); Serial.println(" mA");
-		Serial.print("Power:         "); Serial.print(ina219.getPower_mW()); Serial.println(" mW");
-		Serial.print("");
+		// Serial.print("Bus Voltage:   "); Serial.print(ina219.getBusVoltage_V()); Serial.println(" V");
+		// Serial.print("Current:       "); Serial.print(ina219.getCurrent_mA()); Serial.println(" mA");
+		// Serial.print("Power:         "); Serial.print(ina219.getPower_mW()); Serial.println(" mW");
+		// Serial.print("");
 		lcd.clear();
 		lcd.setCursor(0,0);
-		lcd.print("V = "); lcd.print(ina219.getBusVoltage_V()); lcd.print("V");
-		lcd.print("W = "); lcd.print(ina219.getPower_mW()); lcd.print("mW");
+		lcd.print("U="); lcd.print(ina219.getBusVoltage_V()); lcd.print("V ");
+		lcd.print("W="); lcd.print(ina219.getPower_mW()); lcd.print("mW");
 		lcd.setCursor(0,1);
-		lcd.print("I = "); lcd.print(ina219.getCurrent_mA()); lcd.print("mA");
+		lcd.print("I="); lcd.print(ina219.getCurrent_mA()); lcd.print("mA");
 		cpt_ina = _timer;
 
 	}
@@ -136,6 +137,11 @@ void otto() {
 	// Serial.println(m3);
 	// Serial.print("M4 = ");
 	// Serial.println(m4);
+
+	Serial.println("A0 : " + analogRead(A0));
+	Serial.println("A1 : " + analogRead(A1));
+	Serial.println("A2 : " + analogRead(A2));
+	Serial.println("A3 : " + analogRead(A3));
 
 	move(m1, m2, m3, m4);
 
