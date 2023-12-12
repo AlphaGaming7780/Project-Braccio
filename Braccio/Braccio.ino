@@ -117,11 +117,11 @@ void BrasManu() {
 }
 
 void otto() {
-	angle += map(analogRead(A0) - analogRead(A1), -1023, 1023, -10, 10);
-	m1 += map(analogRead(A2) - analogRead(A3), -1023, 1023, -10, 10);
+	angle += map(analogRead(A1) - analogRead(A0), -1023, 1023, -45, 45);
+	m1 += map(analogRead(A3) - analogRead(A2), -1023, 1023, -45, 45);
 
-	if(angle > 270) angle = 270;
-	if(angle < -90) angle = -90;
+	if(angle > 135) angle = 135;
+	if(angle < 45) angle = 45;
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
 
@@ -138,6 +138,7 @@ void otto() {
 	// Serial.print("M4 = ");
 	// Serial.println(m4);
 
+	//delay(100);
 	Serial.println(("A0 : %i", analogRead(A0)));
 	Serial.println(("A1 : %i", analogRead(A1)));
 	Serial.println(("A2 : %i", analogRead(A2)));
