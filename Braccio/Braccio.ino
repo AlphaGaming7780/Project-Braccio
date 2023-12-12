@@ -133,8 +133,8 @@ void BrasManu() {
 }
 
 void otto() {
-	angle += map(analogRead(A1) - analogRead(A0), -1023, 1023, -45, 45);
-	m1 += map(analogRead(A3) - analogRead(A2), -1023, 1023, -45, 45);
+	angle += map(analogRead(A0) - analogRead(A1), -1023, 1023, -45, 45);
+	m1 += map(analogRead(A2) - analogRead(A3), -1023, 1023, -45, 45);
 
 	if(angle > 135) angle = 135;
 	if(angle < 45) angle = 45;
