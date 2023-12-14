@@ -6,7 +6,8 @@
 #include <Adafruit_INA219.h>
 #include <LiquidCrystal_I2C.h>
 
-#define MANU_SPEED 5;
+//speed motors
+#define MANU_SPEED 5; 
 
 //Define the current/voltage sensor we use
 Adafruit_INA219 ina219;
@@ -28,10 +29,12 @@ float voltage, power, current;
 //attribute each pins of the lcd screens
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
+//boolean for button holding, operating mode and display
 bool maintien, manu = true, lumi = true;
 
 void setup() {  
 
+	//initialize each digital pins
 	pinMode(2, INPUT);
 	pinMode(3, INPUT);
 	pinMode(4, INPUT);
@@ -69,12 +72,15 @@ void setup() {
 	// Or to use a lower 16V, 400mA range (higher precision on volts and amps):
 	ina219.setCalibration_16V_400mA();
 
-	Serial.println("Measuring voltage and current with INA219 ...");
+	//Serial.println("Measuring voltage and current with INA219 ...");
 
 }
 
 void loop() {
 
+	
+	//Hold the button value when pressed once
+	//Only one button can be pressed at the same time
 	if(!digitalRead(2) && !maintien) {
 		maintien = true;
 		manu = !manu;
@@ -88,7 +94,7 @@ void loop() {
 	//cpt_ina is a variable used as a delay. We wanted to not use the delay function because it can block the braccio
 	//The program decrement cpt_ina each time it complete a loop
 	if(cpt_ina == 0 && !lumi){
-		// use serial monitor for debug mode
+		// Stock each value to display them later
 		voltage = ina219.getBusVoltage_V();
 		power = ina219.getPower_mW();
 		current = ina219.getCurrent_mA();
@@ -101,6 +107,7 @@ void loop() {
 		lcd.print("I="); lcd.print(current); lcd.print("mA"); //print the current value "I=x.xxmA"
 		cpt_ina = _timer; //reset delay value
 	} else if(cpt_ina == 0) {
+		//Convert each LDR's anolog value to volatge value and display them on the lcd.
 		lcd.clear();
 		lcd.setCursor(0,0);
 		lcd.print("P0="); lcd.print(((float)analogRead(A0)/1023)*5); lcd.print("V ");
@@ -125,6 +132,8 @@ void loop() {
 	M6=gripper degrees. Allowed values from 10 to 73 degrees. 10: the toungue is open, 73: the gripper is closed.
 	*/
 	
+
+	// Call manual function or auto function 
 	if(manu) {
 		BrasManu();
 	} else {
@@ -133,6 +142,7 @@ void loop() {
 }
 
 // Function that actualize each servo position
+// Use delay to lower the movement speed of each servo
 void move(int vdelay, int m1, int m2, int m3, int m4) {
 	int delayBraccio = vdelay >= 30 ? vdelay-30 : vdelay;
 	Braccio.ServoMovement(delayBraccio, m1+10, m2-1, m3+7, m4+6, 90, 73);
@@ -141,6 +151,7 @@ void move(int vdelay, int m1, int m2, int m3, int m4) {
 }
 
 
+// Manual function controlled by 4 buttons
 void BrasManu() {
 
 	if(!digitalRead(3)) {
@@ -161,6 +172,7 @@ void BrasManu() {
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
 
+	// Split angle value for each servo on the vertical axis
 	m2 = 90+(angle-90)/3;
 	m3 = 90+(angle-90)/3;
 	m4 = 90+(angle-90)/3;
@@ -170,10 +182,14 @@ void BrasManu() {
 }
 
 void otto() {
+
+	// Remap substraction value between opposite LDR and convert in angle value
 	int diffH = map((analogRead(A2) - analogRead(A3) + 30), -1023, 1023, -90, 90);
 	int diffV = map((analogRead(A0) - analogRead(A1) - 15), -1023, 1023, -90, 90);
+	// Add angle value to previous angle value
 	angle += diffV;
 	m1 += diffH;
+	// Use dynamic delay for movement speed
 	vdelay = map((diffH+diffV)/2, -45, 45, 90, 10);
 
 	// Serial.println(map((analogRead(A2) - analogRead(A3))*2, -1023, 1023, -45, 45));
