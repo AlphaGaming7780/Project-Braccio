@@ -186,14 +186,13 @@ void otto() {
 	// Remap substraction value between opposite LDR and convert in angle value
 	int diffH = map((analogRead(A2) - analogRead(A3) + 30), -1023, 1023, -90, 90);
 	int diffV = map((analogRead(A0) - analogRead(A1) - 15), -1023, 1023, -90, 90);
+
 	// Add angle value to previous angle value
 	angle += diffV;
 	m1 += diffH;
-	// Use dynamic delay for movement speed
-	vdelay = map((diffH+diffV)/2, -45, 45, 90, 10);
 
-	// Serial.println(map((analogRead(A2) - analogRead(A3))*2, -1023, 1023, -45, 45));
-	// Serial.println(vdelay);
+	// Use dynamic delay for movement speed
+	vdelay = map((abs(diffH)+abs(diffV))/2, -45, 45, 90, 10);
 
 	if(angle > 225) angle = 225;
 	if(angle < -45) angle = -45;
@@ -205,22 +204,6 @@ void otto() {
 	m2 = 90+(angle-90)/3;
 	m3 = 90+(angle-90)/3;
 	m4 = 90+(angle-90)/3;
-
-	// Use serial monitor for debug mode
-	// Serial.print("M1 = ");
-	// Serial.println(m1);
-	// Serial.print("M2 = ");
-	// Serial.println(m2);
-	// Serial.print("M3 = ");
-	// Serial.println(m3);
-	// Serial.print("M4 = ");
-	// Serial.println(m4);
-
-	//delay(100);
-	// Serial.println(("A0 : %i", analogRead(A0)));
-	// Serial.println(("A1 : %i", analogRead(A1)));
-	// Serial.println(("A2 : %i", analogRead(A2)));
-	// Serial.println(("A3 : %i", analogRead(A3)));
 
 	// Call move function
 	move(vdelay, m1, m2, m3, m4);
