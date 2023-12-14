@@ -4,7 +4,9 @@
 #include <Servo.h>
 #include <Wire.h>
 #include <Adafruit_INA219.h>
-#include <LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
+
+#define MANU_SPEED 5;
 
 //Define the current/voltage sensor we use
 Adafruit_INA219 ina219;
@@ -20,14 +22,24 @@ Servo gripper;
 //Define all the variables we need
 //const int cannot change
 //int can change
-const int rs = 2, en = 3, d4 = 4, d5 = 5, d6 = 7, d7 = 8,  _timer = 100;
-int m1 = 0, m2 = 90, m3 = 90, m4 = 90, angle = -90, cpt_ina = 0;
+const int _timer = 5;
+int m1 = 90, m2 = 90, m3 = 90, m4 = 90, angle = 90, cpt_ina = 0, vdelay;
+float voltage, power, current;
 //attribute each pins of the lcd screens
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
-bool manu = false;
+bool maintien, manu = true, lumi = true;
 
 void setup() {  
+
+	pinMode(2, INPUT);
+	pinMode(3, INPUT);
+	pinMode(4, INPUT);
+	pinMode(5, INPUT);
+	pinMode(7, INPUT);
+	pinMode(8, OUTPUT);
+	pinMode(13, INPUT);
+
 
 	//Initialization functions and set up the initial position for Braccio
 	//All the servo motors will be positioned in the "safety" position:
@@ -39,7 +51,11 @@ void setup() {
 	//gripper (M6): 10 degrees
   	Serial.begin(115200); 	//initialize serial communication
 	Braccio.begin();		//initialize braccio
-	lcd.begin(16, 2);		//initialize lcd screen
+ 	lcd.init();		//initialize lcd screen
+	lcd.backlight();
+	lcd.clear(); //clear the screen
+	lcd.setCursor(0,0); 
+	lcd.print("Starting...");
 
 	// Initialize the INA219.
 	// By default the initialization will use the largest range (32V, 2A).  However
@@ -54,32 +70,49 @@ void setup() {
 	ina219.setCalibration_16V_400mA();
 
 	Serial.println("Measuring voltage and current with INA219 ...");
-	lcd.print("HELLO WORLD");
 
 }
 
 void loop() {
 
+	if(!digitalRead(2) && !maintien) {
+		maintien = true;
+		manu = !manu;
+	} else if (!digitalRead(13) && !maintien) {
+		maintien = true;
+		lumi = !lumi;
+	} else if(maintien && digitalRead(2) && digitalRead(13)){
+		maintien = false;
+	}
+
 	//cpt_ina is a variable used as a delay. We wanted to not use the delay function because it can block the braccio
 	//The program decrement cpt_ina each time it complete a loop
-	if(cpt_ina == 0){
+	if(cpt_ina == 0 && !lumi){
 		// use serial monitor for debug mode
-		// Serial.print("Bus Voltage:   "); Serial.print(ina219.getBusVoltage_V()); Serial.println(" V");
-		// Serial.print("Current:       "); Serial.print(ina219.getCurrent_mA()); Serial.println(" mA");
-		// Serial.print("Power:         "); Serial.print(ina219.getPower_mW()); Serial.println(" mW");
-		// Serial.print("");
+		voltage = ina219.getBusVoltage_V();
+		power = ina219.getPower_mW();
+		current = ina219.getCurrent_mA();
+
 		lcd.clear(); //clear the screen
 		lcd.setCursor(0,0); //write first character in the first place
-		lcd.print("U="); lcd.print(ina219.getBusVoltage_V()); lcd.print("V "); //print the voltage value "U=x.xxV". We cannot put space between character, the place is limited on our screen 16x2
-		lcd.print("W="); lcd.print(ina219.getPower_mW()); lcd.print("mW"); //print the power value "W=x.xxmW".
+		lcd.print("U="); lcd.print(voltage); lcd.print("V "); //print the voltage value "U=x.xxV". We cannot put space between character, the place is limited on our screen 16x2
+		lcd.print("W="); lcd.print(power); lcd.print("mW"); //print the power value "W=x.xxmW".
 		lcd.setCursor(0,1); //set cursor on the second line of the screen.
-		lcd.print("I="); lcd.print(ina219.getCurrent_mA()); lcd.print("mA"); //print the current value "I=x.xxmA"
+		lcd.print("I="); lcd.print(current); lcd.print("mA"); //print the current value "I=x.xxmA"
 		cpt_ina = _timer; //reset delay value
-
+	} else if(cpt_ina == 0) {
+		lcd.clear();
+		lcd.setCursor(0,0);
+		lcd.print("P0="); lcd.print(((float)analogRead(A0)/1023)*5); lcd.print("V ");
+		lcd.print("P2="); lcd.print(((float)analogRead(A2)/1023)*5); lcd.print("V");
+		lcd.setCursor(0,1);
+		lcd.print("P1="); lcd.print(((float)analogRead(A1)/1023)*5); lcd.print("V ");
+		lcd.print("P3="); lcd.print(((float)analogRead(A3)/1023)*5); lcd.print("V");
+		cpt_ina = _timer; //reset delay value
 	}
-	
-	
-	// delay(500);
+	cpt_ina--;
+
+	digitalWrite(8, manu);
 
 
 	/*
@@ -96,48 +129,58 @@ void loop() {
 		BrasManu();
 	} else {
 		otto();
-	}
-	cpt_ina--;
-	 
+	} 
 }
 
 // Function that actualize each servo position
-void move(int m1, int m2, int m3, int m4) {
-	Braccio.ServoMovement(10, m1+10, m2-1, m3+7, m4+6, 90, 73);
+void move(int vdelay, int m1, int m2, int m3, int m4) {
+	int delayBraccio = vdelay >= 30 ? vdelay-30 : vdelay;
+	Braccio.ServoMovement(delayBraccio, m1+10, m2-1, m3+7, m4+6, 90, 73);
+	delay(vdelay >= 30 ? vdelay-30 : 0);
+	if(vdelay >= 20) delay(vdelay/2);
 }
 
 
 void BrasManu() {
-	//remap each joystick axis value to angle value
-	m1 += map(analogRead(A0), 0, 1023, -10, 10);
-	m2 += map(analogRead(A1), 0, 1023, -10, 10);
-	m3 += map(analogRead(A2)-8, 0, 1023, -10, 10);
-	m4 += map(analogRead(A3)-4, 0, 1023, -10, 10);
 
-	// Use serial monitor for debug mode
-	// Serial.println(analogRead(A2)-8);
-	// Serial.println(analogRead(A3)-4);
+	if(!digitalRead(3)) {
+		m1 -= MANU_SPEED;
+	} else if (!digitalRead(4)) {
+		m1 += MANU_SPEED;
+	} else if (!digitalRead(5)) {
+		angle -= MANU_SPEED;
+	} else if (!digitalRead(7)) {
+		angle += MANU_SPEED;
+	}
+
 
 	// Avoid servo to go over limits
+	if(angle > 225) angle = 225;
+	if(angle < -45) angle = -45;
+
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
-	if(m2 > 180) m2 = 180;
-	if(m2 < 0) m2 = 0;
-	if(m3 > 180) m3 = 180;
-	if(m3 < 0) m3 = 0;
-	if(m4 > 180) m4 = 180;
-	if(m4 < 0) m4 = 0;
+
+	m2 = 90+(angle-90)/3;
+	m3 = 90+(angle-90)/3;
+	m4 = 90+(angle-90)/3;
 
 	// Call move function
-	move(m1, m2, m3, m4);
+	move(30, m1, m2, m3, m4);
 }
 
 void otto() {
-	angle += map(analogRead(A0) - analogRead(A1), -1023, 1023, -45, 45);
-	m1 += map(analogRead(A2) - analogRead(A3), -1023, 1023, -45, 45);
+	int diffH = map((analogRead(A2) - analogRead(A3) + 30), -1023, 1023, -90, 90);
+	int diffV = map((analogRead(A0) - analogRead(A1) - 15), -1023, 1023, -90, 90);
+	angle += diffV;
+	m1 += diffH;
+	vdelay = map((diffH+diffV)/2, -45, 45, 90, 10);
 
-	if(angle > 135) angle = 135;
-	if(angle < 45) angle = 45;
+	// Serial.println(map((analogRead(A2) - analogRead(A3))*2, -1023, 1023, -45, 45));
+	// Serial.println(vdelay);
+
+	if(angle > 225) angle = 225;
+	if(angle < -45) angle = -45;
 
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
@@ -158,12 +201,12 @@ void otto() {
 	// Serial.println(m4);
 
 	//delay(100);
-	Serial.println(("A0 : %i", analogRead(A0)));
-	Serial.println(("A1 : %i", analogRead(A1)));
-	Serial.println(("A2 : %i", analogRead(A2)));
-	Serial.println(("A3 : %i", analogRead(A3)));
+	// Serial.println(("A0 : %i", analogRead(A0)));
+	// Serial.println(("A1 : %i", analogRead(A1)));
+	// Serial.println(("A2 : %i", analogRead(A2)));
+	// Serial.println(("A3 : %i", analogRead(A3)));
 
 	// Call move function
-	move(m1, m2, m3, m4);
+	move(vdelay, m1, m2, m3, m4);
 
 }
