@@ -24,7 +24,7 @@ Servo gripper;
 //const int cannot change
 //int can change
 const int _timer = 5;
-int m1, m2, m3, m4, angle = 90, cpt_ina = 0, vdelay;
+int m1 = 90, angle = 90, cpt_ina = 0, vdelay;
 float voltage, power, current;
 //attribute each pins of the lcd screens
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
@@ -143,9 +143,9 @@ void loop() {
 
 // Function that actualize each servo position
 // Use delay to lower the movement speed of each servo
-void move(int vdelay, int m1, int m2, int m3, int m4) {
+void move(int vdelay, int m1, int angle) {
 	int delayBraccio = vdelay >= 30 ? vdelay-30 : vdelay;
-	Braccio.ServoMovement(delayBraccio, m1, m2-1, m3+7, m4+6, 90, 73);
+	Braccio.ServoMovement(delayBraccio, m1, (90+(angle-90)/3)-1, (90+(angle-90)/3)+7, (90+(angle-90)/3)+6, 90, 73);
 	delay(vdelay >= 30 ? vdelay-30 : 0);
 	if(vdelay >= 20) delay(vdelay/2);
 }
@@ -172,13 +172,8 @@ void BrasManu() {
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
 
-	// Split angle value for each servo on the vertical axis
-	m2 = 90+(angle-90)/3;
-	m3 = 90+(angle-90)/3;
-	m4 = 90+(angle-90)/3;
-
 	// Call move function
-	move(30, m1, m2, m3, m4);
+	move(30, m1, angle);
 }
 
 void otto() {
@@ -200,12 +195,7 @@ void otto() {
 	if(m1 > 180) m1 = 180;
 	if(m1 < 0) m1 = 0;
 
-	// Split angle value for each servo on the vertical axis
-	m2 = 90+(angle-90)/3;
-	m3 = 90+(angle-90)/3;
-	m4 = 90+(angle-90)/3;
-
 	// Call move function
-	move(vdelay, m1, m2, m3, m4);
+	move(vdelay, m1, angle);
 
 }
