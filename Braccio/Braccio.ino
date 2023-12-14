@@ -24,7 +24,7 @@ Servo gripper;
 //const int cannot change
 //int can change
 const int _timer = 5;
-int m1 = 90, m2 = 90, m3 = 90, m4 = 90, angle = 90, cpt_ina = 0, vdelay;
+int m1, m2, m3, m4, angle = 90, cpt_ina = 0, vdelay;
 float voltage, power, current;
 //attribute each pins of the lcd screens
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
