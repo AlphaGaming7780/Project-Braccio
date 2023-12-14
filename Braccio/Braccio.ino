@@ -135,7 +135,7 @@ void loop() {
 // Function that actualize each servo position
 void move(int vdelay, int m1, int m2, int m3, int m4) {
 	int delayBraccio = vdelay >= 30 ? vdelay-30 : vdelay;
-	Braccio.ServoMovement(delayBraccio, m1+10, m2-1, m3+7, m4+6, 90, 73);
+	Braccio.ServoMovement(delayBraccio, m1, m2-1, m3+7, m4+6, 90, 73);
 	delay(vdelay >= 30 ? vdelay-30 : 0);
 	if(vdelay >= 20) delay(vdelay/2);
 }
