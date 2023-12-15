@@ -1,3 +1,7 @@
+// 11-15/12/2023 HEH Mons
+// This code has been written by Loïc Trioen and Mathys Deboever
+// Do not copy without thinking, consider trying by yourself
+
 //Include all the lbraries we need
 
 #include <Braccio.h>
