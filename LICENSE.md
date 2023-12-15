@@ -1,6 +1,8 @@
-MIT License
-
 Copyright (c) 2023 TritonSupreme/AlphaGaming7780
+
+11-15/12/2023 HEH Mons
+This code has been written by Loïc Trioen and Mathys Deboever
+If you use this code in this GitHub or a part of it, you need to credit both name mentioned above.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
