@@ -1,6 +1,6 @@
 // 11-15/12/2023 HEH Mons
 // This code has been written by Loïc Trioen and Mathys Deboever
-// Do not copy without thinking, consider trying by yourself
+// If you use this code or a part of it, you need to credit both name mentioned above.
 
 //Include all the lbraries we need
 
