@@ -43,6 +43,11 @@ void setup() {
 	pinMode(8, OUTPUT);
 	pinMode(13, INPUT);
 
+ 	lcd.init();		//initialize lcd screen
+	lcd.backlight();
+	lcd.clear(); //clear the screen
+	lcd.setCursor(0,0); 
+	lcd.print("Starting...");
 
 	//Initialization functions and set up the initial position for Braccio
 	//All the servo motors will be positioned in the "safety" position:
@@ -54,11 +59,7 @@ void setup() {
 	//gripper (M6): 10 degrees
   	Serial.begin(115200); 	//initialize serial communication
 	Braccio.begin();		//initialize braccio
- 	lcd.init();		//initialize lcd screen
-	lcd.backlight();
-	lcd.clear(); //clear the screen
-	lcd.setCursor(0,0); 
-	lcd.print("Starting...");
+
 
 	// Initialize the INA219.
 	// By default the initialization will use the largest range (32V, 2A).  However
@@ -179,15 +180,15 @@ void BrasManu() {
 void otto() {
 
 	// Remap substraction value between opposite LDR and convert in angle value
-	int diffH = map((analogRead(A2) - analogRead(A3) + 30), -1023, 1023, -90, 90);
-	int diffV = map((analogRead(A0) - analogRead(A1) - 15), -1023, 1023, -90, 90);
+	int diffH = map((analogRead(A2) - analogRead(A3) + 15), -1023, 1023, -60, 60);
+	int diffV = map((analogRead(A0) - analogRead(A1) - 15), -1023, 1023, -60, 60);
 
 	// Add angle value to previous angle value
 	angle += diffV;
 	m1 += diffH;
 
 	// Use dynamic delay for movement speed
-	vdelay = map((abs(diffH)+abs(diffV))/2, -45, 45, 90, 10);
+	vdelay = map((abs(diffH)+abs(diffV))/2, -60, 60, 90, 10);
 
 	if(angle > 225) angle = 225;
 	if(angle < -45) angle = -45;
