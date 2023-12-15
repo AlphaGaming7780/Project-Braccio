@@ -180,15 +180,15 @@ void BrasManu() {
 void otto() {
 
 	// Remap substraction value between opposite LDR and convert in angle value
-	int diffH = map((analogRead(A2) - analogRead(A3) + 15), -1023, 1023, -60, 60);
-	int diffV = map((analogRead(A0) - analogRead(A1) - 15), -1023, 1023, -60, 60);
+	int diffH = map((analogRead(A2) - analogRead(A3) + 15), -1023, 1023, -120, 120);
+	int diffV = map((analogRead(A0) - analogRead(A1) - 15), -1023, 1023, -45, 45);
 
 	// Add angle value to previous angle value
 	angle += diffV;
 	m1 += diffH;
 
 	// Use dynamic delay for movement speed
-	vdelay = map((abs(diffH)+abs(diffV))/2, -60, 60, 90, 10);
+	vdelay = map((abs(diffH)+abs(diffV))/2, -45, 45, 90, 10);
 
 	if(angle > 225) angle = 225;
 	if(angle < -45) angle = -45;
